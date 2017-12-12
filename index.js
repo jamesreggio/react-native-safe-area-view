@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import {
   DeviceInfo,
   Dimensions,
@@ -76,7 +76,7 @@ const doubleFromPercentString = percent => {
   return dbl;
 };
 
-class SafeView extends Component {
+class SafeView extends PureComponent {
   state = {
     touchesTop: true,
     touchesBottom: true,
