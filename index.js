@@ -93,7 +93,7 @@ class SafeView extends PureComponent {
     });
   }
 
-  componentWillReceiveProps() {
+  componentDidUpdate() {
     this._onLayout();
   }
 
