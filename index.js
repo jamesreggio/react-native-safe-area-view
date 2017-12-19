@@ -120,7 +120,9 @@ class SafeView extends PureComponent {
     );
   }
 
-  _onLayout = () => {
+  _onLayout = (e) => {
+    if (e && this.props.onLayout) this.props.onLayout(e);
+
     if (!this.view) return;
 
     const { isLandscape } = this.props;
