@@ -186,7 +186,7 @@ class SafeView extends PureComponent {
       paddingRight: touchesRight ? this._getInset('right') : 0,
     };
 
-    if (isIPhoneX && forceInset) {
+    if (forceInset) {
       Object.keys(forceInset).forEach(key => {
         let inset = forceInset[key];
 
