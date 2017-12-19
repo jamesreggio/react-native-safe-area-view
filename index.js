@@ -100,7 +100,7 @@ class SafeView extends PureComponent {
     });
   }
 
-  componentWillReceiveProps() {
+  componentDidUpdate() {
     this._onLayout();
   }
 
@@ -219,16 +219,6 @@ class SafeView extends PureComponent {
           }
         }
       });
-    }
-
-    // new height/width should only include padding from insets
-    // height/width should not be affected by padding from style obj
-    if (style.height && typeof style.height === 'number') {
-      style.height += style.paddingTop + style.paddingBottom;
-    }
-
-    if (style.width && typeof style.width === 'number') {
-      style.width += style.paddingLeft + style.paddingRight;
     }
 
     style.paddingTop += paddingTop;
