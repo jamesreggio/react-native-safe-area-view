@@ -187,8 +187,30 @@ class SafeView extends PureComponent {
     };
 
     if (forceInset) {
-      Object.keys(forceInset).forEach(key => {
-        let inset = forceInset[key];
+      const insetSides = Object.entries(forceInset)
+        .reduce((insetSides, [key, value]) => {
+          if (key === 'vertical') {
+            return {
+              ...insetSides,
+              top: value,
+              bottom: value,
+            };
+          } else if (key === 'horizontal') {
+            return {
+              ...insetSides,
+              left: value,
+              right: value,
+            };
+          } else {
+            return {
+              ...insetSides,
+              [key]: value,
+            };
+          }
+        }, {});
+
+      Object.keys(insetSides).forEach(key => {
+        let inset = insetSides[key];
 
         if (inset === 'always') {
           inset = this._getInset(key);
@@ -199,16 +221,6 @@ class SafeView extends PureComponent {
         }
 
         switch (key) {
-          case 'horizontal': {
-            style.paddingLeft = inset;
-            style.paddingRight = inset;
-            break;
-          }
-          case 'vertical': {
-            style.paddingTop = inset;
-            style.paddingBottom = inset;
-            break;
-          }
           case 'left':
           case 'right':
           case 'top':
