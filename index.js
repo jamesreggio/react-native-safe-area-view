@@ -1,5 +1,6 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import {
+  StatusBar,
   DeviceInfo,
   Dimensions,
   InteractionManager,
@@ -52,7 +53,13 @@ const isIPad = (() => {
   return true;
 })();
 
+const isAndroid = (Platform.OS === 'android');
+
 const statusBarHeight = isLandscape => {
+  if (isAndroid) {
+    return StatusBar.currentHeight;
+  }
+
   if (isIPhoneX) {
     return isLandscape ? 0 : 44;
   }
@@ -76,13 +83,14 @@ const doubleFromPercentString = percent => {
   return dbl;
 };
 
-class SafeView extends Component {
+class SafeView extends PureComponent {
   state = {
     touchesTop: true,
     touchesBottom: true,
     touchesLeft: true,
     touchesRight: true,
     orientation: null,
+    keyboardVisible: false,
     viewWidth: 0,
     viewHeight: 0,
   };
@@ -93,16 +101,12 @@ class SafeView extends Component {
     });
   }
 
-  componentWillReceiveProps() {
+  componentDidUpdate() {
     this._onLayout();
   }
 
   render() {
     const { forceInset = false, isLandscape, children, style } = this.props;
-
-    if (Platform.OS !== 'ios') {
-      return <View style={style}>{this.props.children}</View>;
-    }
 
     const safeAreaStyle = this._getSafeAreaStyle();
 
@@ -117,13 +121,19 @@ class SafeView extends Component {
     );
   }
 
-  _onLayout = () => {
+  _onLayout = (e) => {
+    if (e && this.props.onLayout) this.props.onLayout(e);
+
     if (!this.view) return;
 
     const { isLandscape } = this.props;
     const { orientation } = this.state;
     const newOrientation = isLandscape ? 'landscape' : 'portrait';
-    if (orientation && orientation === newOrientation) {
+
+    if (
+      orientation && orientation === newOrientation &&
+      this.props.keyboardVisible === this.state.keyboardVisible
+    ) {
       return;
     }
 
@@ -157,6 +167,7 @@ class SafeView extends Component {
         touchesLeft,
         touchesRight,
         orientation: newOrientation,
+        keyboardVisible: this.props.keyboardVisible,
         viewWidth: winWidth,
         viewHeight: winHeight,
       });
@@ -183,9 +194,31 @@ class SafeView extends Component {
       paddingRight: touchesRight ? this._getInset('right') : 0,
     };
 
-    if (isIPhoneX && forceInset) {
-      Object.keys(forceInset).forEach(key => {
-        let inset = forceInset[key];
+    if (forceInset) {
+      const insetSides = Object.entries(forceInset)
+        .reduce((insetSides, [key, value]) => {
+          if (key === 'vertical') {
+            return {
+              ...insetSides,
+              top: value,
+              bottom: value,
+            };
+          } else if (key === 'horizontal') {
+            return {
+              ...insetSides,
+              left: value,
+              right: value,
+            };
+          } else {
+            return {
+              ...insetSides,
+              [key]: value,
+            };
+          }
+        }, {});
+
+      Object.keys(insetSides).forEach(key => {
+        let inset = insetSides[key];
 
         if (inset === 'always') {
           inset = this._getInset(key);
@@ -196,16 +229,6 @@ class SafeView extends Component {
         }
 
         switch (key) {
-          case 'horizontal': {
-            style.paddingLeft = inset;
-            style.paddingRight = inset;
-            break;
-          }
-          case 'vertical': {
-            style.paddingTop = inset;
-            style.paddingBottom = inset;
-            break;
-          }
           case 'left':
           case 'right':
           case 'top':
