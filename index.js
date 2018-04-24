@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import {
   StatusBar,
   DeviceInfo,
@@ -83,13 +83,14 @@ const doubleFromPercentString = percent => {
   return dbl;
 };
 
-class SafeView extends Component {
+class SafeView extends PureComponent {
   state = {
     touchesTop: true,
     touchesBottom: true,
     touchesLeft: true,
     touchesRight: true,
     orientation: null,
+    keyboardVisible: false,
     viewWidth: 0,
     viewHeight: 0,
   };
@@ -128,7 +129,11 @@ class SafeView extends Component {
     const { isLandscape } = this.props;
     const { orientation } = this.state;
     const newOrientation = isLandscape ? 'landscape' : 'portrait';
-    if (orientation && orientation === newOrientation) {
+
+    if (
+      orientation && orientation === newOrientation &&
+      this.props.keyboardVisible === this.state.keyboardVisible
+    ) {
       return;
     }
 
@@ -162,6 +167,7 @@ class SafeView extends Component {
         touchesLeft,
         touchesRight,
         orientation: newOrientation,
+        keyboardVisible: this.props.keyboardVisible,
         viewWidth: winWidth,
         viewHeight: winHeight,
       });
