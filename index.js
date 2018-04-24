@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {
+  StatusBar,
   DeviceInfo,
   Dimensions,
   InteractionManager,
@@ -52,7 +53,13 @@ const isIPad = (() => {
   return true;
 })();
 
+const isAndroid = (Platform.OS === 'android');
+
 const statusBarHeight = isLandscape => {
+  if (isAndroid) {
+    return StatusBar.currentHeight;
+  }
+
   if (isIPhoneX) {
     return isLandscape ? 0 : 44;
   }
@@ -99,10 +106,6 @@ class SafeView extends Component {
 
   render() {
     const { forceInset = false, isLandscape, children, style } = this.props;
-
-    if (Platform.OS !== 'ios') {
-      return <View style={style}>{this.props.children}</View>;
-    }
 
     const safeAreaStyle = this._getSafeAreaStyle();
 
